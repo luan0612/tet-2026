@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đếm ngược đến Tết</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #b90b1f;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    #nowTime {
+      font-size: 1rem;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    label {
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    select {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background-color: white;
+      color: #b90b1f;
+      margin-bottom: 1rem;
+    }
+    .countdown-block {
+      background-color: white;
+      color: #b90b1f;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem;
+      text-align: center;
+      width: 280px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    }
+    .countdown-block h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .countdown-days {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    .countdown-time {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+    .info {
+      margin-top: 1rem;
+      color: white;
+    }
+    footer {
+      margin-top: auto;
+      width: 100%;
+      background-color: #b90b1f;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #fff5f5;
+      font-style: italic;
+    }
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">Đếm ngược đến Tết <span id="yearTitle">2026</span></h1>
+  <div id="nowTime"></div>
+  <label for="yearSelector">Chọn năm:</label>
+  <select id="yearSelector"></select>
+  <div class="info" id="duongTarget"></div>
+  <div class="countdown-block">
+    <h2>Tết Dương Lịch</h2>
+    <div class="countdown-days" id="duongDays"></div>
+    <div class="countdown-time" id="duongTime"></div>
+  </div>
+  <div class="info" id="nguyendanTarget"></div>
+  <div class="countdown-block">
+    <h2>Tết Nguyên Đán</h2>
+    <div class="countdown-days" id="tetDays"></div>
+    <div class="countdown-time" id="tetTime"></div>
+  </div>
+  <footer>
+    Lưu ý: Từ năm 2031 trở đi, mọi thông tin về tết nguyên đán trên website hiển thị đều không chính xác và sẽ được cập nhật sau.<br>
+    © 2025 - Build by Zn
+  </footer>
+  <script>
+    const nowTimeEl = document.getElementById("nowTime");
+    const yearSelectorEl = document.getElementById("yearSelector");
+    const yearTitleSpan = document.getElementById("yearTitle");
+    const duongTargetEl = document.getElementById("duongTarget");
+    const nguyendanTargetEl = document.getElementById("nguyendanTarget");
+    const duongDays = document.getElementById("duongDays");
+    const duongTime = document.getElementById("duongTime");
+    const tetDays = document.getElementById("tetDays");
+    const tetTime = document.getElementById("tetTime");
+
+    const tetInfo = {
+      2026: { date: "2026-02-17T00:00:00" },
+      2027: { date: "2027-02-06T00:00:00" },
+      2028: { date: "2028-01-26T00:00:00" },
+      2029: { date: "2029-02-13T00:00:00" },
+      2030: { date: "2030-02-03T00:00:00" },
+    };
+
+    function updateNowTime() {
+      const now = new Date();
+      nowTimeEl.textContent = `Bây giờ là ${now.toLocaleTimeString('vi-VN')} - ${now.toLocaleDateString('vi-VN')}`;
+    }
+    setInterval(updateNowTime, 1000);
+    updateNowTime();
+
+    let duongInterval = null;
+    let tetInterval = null;
+
+    function updateCountdown(targetDate, daysEl, timeEl, oldInterval) {
+      if (oldInterval) clearInterval(oldInterval);
+
+      function run() {
+        const now = new Date();
+        const diff = targetDate - now;
+        if (diff <= 0) {
+          daysEl.textContent = '0';
+          timeEl.textContent = '00:00:00';
+          return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        daysEl.textContent = days;
+        timeEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      run();
+      return setInterval(run, 1000);
+    }
+
+    function setYear(year) {
+      const duongDate = new Date(`${year}-01-01T00:00:00`);
+      duongTargetEl.textContent = `Tết Dương Lịch ${year} rơi vào ngày ${duongDate.toLocaleDateString('vi-VN')}`;
+      duongInterval = updateCountdown(duongDate, duongDays, duongTime, duongInterval);
+
+      const tet = tetInfo[year];
+      if (tet) {
+        const tetDate = new Date(tet.date);
+        nguyendanTargetEl.textContent = `Tết Nguyên Đán ${year} rơi vào ngày ${tetDate.toLocaleDateString('vi-VN')}`;
+        tetInterval = updateCountdown(tetDate, tetDays, tetTime, tetInterval);
+      } else {
+        nguyendanTargetEl.textContent = `Không có dữ liệu Tết Nguyên Đán cho năm ${year}`;
+        tetDays.textContent = '--';
+        tetTime.textContent = '--:--:--';
+        if (tetInterval) clearInterval(tetInterval);
+      }
+
+      yearTitleSpan.textContent = year;
+    }
+
+    for (let y = 2026; y <= 3000; y++) {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = `Tết ${y}`;
+      yearSelectorEl.appendChild(opt);
+    }
+
+    yearSelectorEl.addEventListener("change", () => {
+      setYear(yearSelectorEl.value);
+    });
+
+    const defaultYear = new Date().getFullYear() + 1;
+    yearSelectorEl.value = defaultYear;
+    setYear(defaultYear);
+  </script>
+</body>
+</html>
+
